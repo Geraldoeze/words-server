@@ -6,7 +6,6 @@ const mongoConnect = require('./database/mongoConnect').mongoConnect;
 
 const wordsRoutes = require("./routes/word-routes");
 
-
 const app = express();
 const httpServer = createServer(app);
 const cors = require("cors");
