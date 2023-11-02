@@ -116,6 +116,114 @@ exports.postWords = async (req, res, next) => {
   }
 };
 
+exports.editWord = async (req, res, next) => {
+  const db = await getDb();
+  const { alphabet, word } = req.body;
+
+  try {
+    // Find the existing alphabet document
+    const existingAlphabet = await db
+      .collection("alphabet")
+      .findOne({ alphabet: alphabet });
+
+    if (!existingAlphabet) {
+      return res.status(404).json({
+        error: "Error",
+        message: "Alphabet not found in the database",
+      });
+    }
+
+    // Find the existing word in the 'words' array
+    const existingWordIndex = existingAlphabet.words.findIndex(
+      (w) => w.name === word.name
+    );
+
+    if (existingWordIndex === -1) {
+      return res.status(404).json({
+        error: "Error",
+        message: "Word not found in the alphabet",
+      });
+    }
+
+    // Update the existing word in the 'words' array
+    existingAlphabet.words[existingWordIndex] = word;
+
+    // Update the alphabet document in the collection
+    await db
+      .collection("alphabet")
+      .updateOne(
+        { alphabet: alphabet },
+        { $set: { words: existingAlphabet.words } }
+      );
+
+    // Respond with a success message
+    return res.status(200).json({
+      message: "Word updated successfully.",
+    });
+  } catch (error) {
+    console.error("Error updating data:", error);
+    res.status(500).json({
+      error: "An error occurred while updating data.",
+      message: error.message,
+    });
+  }
+};
+
+
+exports.deleteWord = async (req, res, next) => {
+  const db = await getDb();
+  const { alphabet, wordName } = req.body;
+
+  try {
+    // Find the existing alphabet document
+    const existingAlphabet = await db
+      .collection("alphabet")
+      .findOne({ alphabet: alphabet });
+
+    if (!existingAlphabet) {
+      return res.status(404).json({
+        error: "Error",
+        message: "Alphabet not found in the database",
+      });
+    }
+
+    // Find the existing word in the 'words' array
+    const existingWordIndex = existingAlphabet.words.findIndex(
+      (w) => w.name === wordName
+    );
+
+    if (existingWordIndex === -1) {
+      return res.status(404).json({
+        error: "Error",
+        message: "Word not found in the alphabet",
+      });
+    }
+
+    // Remove the word from the 'words' array
+    existingAlphabet.words.splice(existingWordIndex, 1);
+
+    // Update the alphabet document in the collection without the deleted word
+    await db
+      .collection("alphabet")
+      .updateOne(
+        { alphabet: alphabet },
+        { $set: { words: existingAlphabet.words } }
+      );
+
+    // Respond with a success message
+    return res.status(200).json({
+      message: "Word deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Error deleting data:", error);
+    res.status(500).json({
+      error: "An error occurred while deleting data.",
+      message: error.message,
+    });
+  }
+};
+
+
 // exports.postWordss = async (req, res, next) => {
 //   const db = await getDb();
 //   // Extract the alphabet and words from req.body

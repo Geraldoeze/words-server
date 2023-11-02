@@ -11,5 +11,7 @@ router.get("/random", wordControllers.getRandom);
 
 router.post("/data", wordControllers.postWords);
 
+router.patch("/edit", wordControllers.editWord)
 
+router.delete("/delete", wordControllers.deleteWord)
 module.exports = router;
